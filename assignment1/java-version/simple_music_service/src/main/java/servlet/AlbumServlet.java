@@ -3,7 +3,6 @@ package servlet;
 import com.google.gson.Gson;
 import dao.AlbumDAO;
 import model.AlbumInfo;
-import model.AlbumPostResponse;
 import model.ErrorMsg;
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -13,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 @WebServlet(name = "Servlet.AlbumServlet", value = "/albums")
 @MultipartConfig
@@ -71,8 +72,6 @@ public class AlbumServlet extends HttpServlet {
         long imageSize = imagePart.getSize();
 
         Part profilePart = req.getPart("profile");
-        System.out.println(imagePart);
-        System.out.println(profilePart);
         InputStream inputStream = profilePart.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         StringBuilder sb = new StringBuilder();
@@ -84,9 +83,11 @@ public class AlbumServlet extends HttpServlet {
         String profileData = sb.toString();
         AlbumInfo newAlbum = gson.fromJson(profileData, AlbumInfo.class);
 
-        AlbumPostResponse albumPostResponse = new AlbumPostResponse("newAlbumId", String.valueOf(imageSize));
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("albumId", "newAlbumId");
+        responseData.put("imageSize", String.valueOf(imageSize));
 
-        res.getWriter().write(gson.toJson(albumPostResponse));
+        res.getWriter().write(gson.toJson(responseData));
     }
 }
 
