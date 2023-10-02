@@ -27,7 +27,7 @@ type Route struct {
 type Routes []Route
 
 func NewRouter() *mux.Router {
-	router := mux.NewRouter().StrictSlash(true)
+	router := mux.NewRouter()
 	for _, route := range routes {
 		var handler http.Handler
 		handler = route.HandlerFunc
@@ -58,11 +58,11 @@ var routes = Routes{
 	Route{
 		"GetAlbumByKey",
 		strings.ToUpper("Get"),
-		"/go_simple_music_service/albums/{albumID}",
+		"/go_simple_music_service/albums/{albumID:.*}",
 		GetAlbumByKey,
 	},
 
-	Route{
+	Route{	
 		"NewAlbum",
 		strings.ToUpper("Post"),
 		"/go_simple_music_service/albums",

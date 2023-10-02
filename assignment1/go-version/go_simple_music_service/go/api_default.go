@@ -27,7 +27,7 @@ func GetAlbumByKey(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
     albumId, ok := vars["albumID"]
-    if !ok {
+    if !ok || albumId == ""{
         writeErrorResponse(w, http.StatusBadRequest, "missing parameters")
         return
     }
