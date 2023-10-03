@@ -71,20 +71,10 @@ public class AlbumServlet extends HttpServlet {
         Part imagePart = req.getPart("image");
         long imageSize = imagePart.getSize();
 
-        Part profilePart = req.getPart("profile");
-        InputStream inputStream = profilePart.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line);
-        }
-
-        String profileData = sb.toString();
-        AlbumInfo newAlbum = gson.fromJson(profileData, AlbumInfo.class);
+        // Todo: process 'profile' part
 
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("albumId", "newAlbumId");
+        responseData.put("albumID", "newAlbumId");
         responseData.put("imageSize", String.valueOf(imageSize));
 
         res.getWriter().write(gson.toJson(responseData));
