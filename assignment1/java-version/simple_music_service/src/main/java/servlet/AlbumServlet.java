@@ -7,11 +7,7 @@ import model.ErrorMsg;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +27,7 @@ public class AlbumServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         String urlPath = req.getPathInfo();
 
-        // check we have a URL!
+        // Check if we have a URL path
         if (urlPath == null || urlPath.isEmpty()) {
             res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             ErrorMsg noParameterError = new ErrorMsg("missing parameters");
@@ -39,17 +35,15 @@ public class AlbumServlet extends HttpServlet {
             return;
         }
         String[] urlParts = urlPath.split("/");
-        // and now validate url path and return the response status code
-        // (and maybe also some value if input is valid)
 
+        // Validate URL path and return the appropriate response
         if (!isUrlValid(urlParts)) {
             res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             ErrorMsg invalidUrlError = new ErrorMsg("invalid URL format");
             res.getWriter().write(gson.toJson(invalidUrlError));
         } else {
             res.setStatus(HttpServletResponse.SC_OK);
-            // do any sophisticated processing with urlParts which contains all the url params
-            // process url params in `urlParts`
+            // Retrieve album data using the provided ID in the URL
             String albumId = urlParts[1];
             AlbumInfo albumInfo = albumDAO.getAlbumByKey(albumId);
             String albumJson = gson.toJson(albumInfo);
@@ -60,6 +54,12 @@ public class AlbumServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Validates the URL format.
+     *
+     * @param urlPath An array of URL segments.
+     * @return true if the URL is valid, false otherwise.
+     */
     private boolean isUrlValid(String[] urlPath) {
         // urlPath  = "/album123"
         // urlParts = [, album123]
@@ -68,15 +68,17 @@ public class AlbumServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        // Extract image part from the request
         Part imagePart = req.getPart("image");
         long imageSize = imagePart.getSize();
 
-        // Todo: process 'profile' part
 
+        // Create a response data map
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("albumID", "newAlbumId");
         responseData.put("imageSize", String.valueOf(imageSize));
 
+        // Send the response back as JSON
         res.getWriter().write(gson.toJson(responseData));
     }
 }
