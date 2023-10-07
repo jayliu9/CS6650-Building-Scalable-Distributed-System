@@ -50,7 +50,7 @@ public class LoadTester {
 
         // Initialization phase: run some threads to "warm-up" the system
         CountDownLatch initLatch = new CountDownLatch(INIT_THREADS);
-        runThreads(executor, apiInstance, INIT_THREADS, INIT_REQUEST_PAIRS, initLatch);
+        runThreads(executor, apiInstance, INIT_THREADS, INIT_REQUEST_PAIRS, initLatch, false);
 
         // Wait for the initialization phase to complete
         try {
@@ -64,7 +64,7 @@ public class LoadTester {
         long startTime = System.currentTimeMillis();
 
         for (int i = 0; i < numThreadGroups; i++) {
-            runThreads(executor, apiInstance, threadGroupSize, REQUEST_PAIRS_PER_THREAD, totalLatch);
+            runThreads(executor, apiInstance, threadGroupSize, REQUEST_PAIRS_PER_THREAD, totalLatch, true);
             if (i < numThreadGroups - 1) {
                 try {
                     Thread.sleep(delay);
@@ -117,23 +117,26 @@ public class LoadTester {
      * @param numOfThreads  The number of threads to be scheduled for the task.
      * @param apiPairCount  The number of API pairs (POST followed by GET) each thread should execute.
      * @param latch         The countdown latch used to synchronize the completion of the threads.
+     * @param recordWrites  Whether to add the records of the API calls to the records queue.
      */
-    private static void runThreads(ExecutorService executor, DefaultApi apiInstance, int numOfThreads, int apiPairCount, CountDownLatch latch) {
+    private static void runThreads(ExecutorService executor, DefaultApi apiInstance, int numOfThreads, int apiPairCount, CountDownLatch latch, boolean recordWrites) {
         for (int i = 0; i < numOfThreads; i++) {
             executor.submit(() -> {
-                apiCallTask(apiInstance, apiPairCount);
+                apiCallTask(apiInstance, apiPairCount, recordWrites);
                 latch.countDown();
             });
         }
     }
 
     /**
-     * Performs the API calls, including a retry logic if the call fails.
+     * Performs the API calls, including a retry logic if the call fails. Optionally adds the records
+     * of the API calls to a queue.
      *
      * @param apiInstance   The API instance used for making the actual calls.
      * @param apiPairCount  The number of API pairs (POST followed by GET) to be executed.
+     * @param recordWrites  Whether to add the records of the API calls to the records queue.
      */
-    private static void apiCallTask(DefaultApi apiInstance, int apiPairCount) {
+    private static void apiCallTask(DefaultApi apiInstance, int apiPairCount, boolean recordWrites) {
         AlbumsProfile profile = new AlbumsProfile();
 
         for (int i = 0; i < apiPairCount; i++) {
@@ -155,7 +158,9 @@ public class LoadTester {
                         long postEndTime = System.currentTimeMillis();
                         // After a successful POST API call, record its details.
                         // This includes start time, the request type (POST), latency, and the response code.
-                        recordsQueue.add(new Record(postStartTime, "POST", postEndTime - postStartTime, postResStatusCode));
+                        if (recordWrites) {
+                            recordsQueue.add(new Record(postStartTime, "POST", postEndTime - postStartTime, postResStatusCode));
+                        }
                         successPost = true;
                     }
                 } catch (Exception e) {
@@ -184,7 +189,9 @@ public class LoadTester {
                         long getEndTime = System.currentTimeMillis();
                         // After a successful GET API call, record its details.
                         // This includes start time, the request type (GET), latency, and the response code.
-                        recordsQueue.add(new Record(getStartTime, "GET", getEndTime - getStartTime, getResStatusCode));
+                        if (recordWrites) {
+                            recordsQueue.add(new Record(getStartTime, "GET", getEndTime - getStartTime, getResStatusCode));
+                        }
                         successGet = true;
                     }
                 } catch (Exception e) {
