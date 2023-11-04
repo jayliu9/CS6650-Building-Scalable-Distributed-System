@@ -11,7 +11,7 @@ public class DatabaseService {
     static {
             HikariConfig config = new HikariConfig();
             config.setMaximumPoolSize(Integer.parseInt(System.getenv("MAXIMUM_CONN_POOL_SIZE")));
-            config.setJdbcUrl("jdbc:mysql://database-album.ckrkh8l5ycja.us-west-2.rds.amazonaws.com:3306/music_service");
+            config.setJdbcUrl("jdbc:mysql://" + System.getenv("DB_HOST") + ":" + System.getenv("DB_PORT") + "/" + System.getenv("DB_NAME"));
             config.setUsername(System.getenv("DB_USERNAME"));
             config.setPassword(System.getenv("DB_PASSWORD"));
             config.setDriverClassName("com.mysql.cj.jdbc.Driver");
