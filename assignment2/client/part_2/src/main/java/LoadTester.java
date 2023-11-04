@@ -161,9 +161,9 @@ public class LoadTester {
      */
     private static void apiCallTask(DefaultApi apiInstance, int apiPairCount, AtomicInteger globalSuccessCount, AtomicInteger globalFailureCount, boolean recordWrites) {
         AlbumsProfile profile = new AlbumsProfile();
-        profile.setYear("1980");
-        profile.setArtist("Artist");
-        profile.setTitle("Moon");
+        profile.setYear("1980");    // Hard-code for the year of a testing album profile
+        profile.setArtist("Artist");    // Hard-code for the artist of a testing album profile
+        profile.setTitle("Moon");   // Hard-code for the title of a testing album profile
 
         int localSuccessCount = 0;
         int localFailureCount = 0;
