@@ -1,0 +1,8 @@
+/Users/liushijie/Documents/CS6650/CS6650-Building-Scalable-Distributed-System/assignment3/consumer/review_consumer/src/main/java/rmqpool/RMQChannelPool.java
+/Users/liushijie/Documents/CS6650/CS6650-Building-Scalable-Distributed-System/assignment3/consumer/review_consumer/src/main/java/dao/ReviewDao.java
+/Users/liushijie/Documents/CS6650/CS6650-Building-Scalable-Distributed-System/assignment3/consumer/review_consumer/src/main/java/consumer/ReviewConsumer.java
+/Users/liushijie/Documents/CS6650/CS6650-Building-Scalable-Distributed-System/assignment3/consumer/review_consumer/src/main/java/util/UUIDUtil.java
+/Users/liushijie/Documents/CS6650/CS6650-Building-Scalable-Distributed-System/assignment3/consumer/review_consumer/src/main/java/service/DatabaseService.java
+/Users/liushijie/Documents/CS6650/CS6650-Building-Scalable-Distributed-System/assignment3/consumer/review_consumer/src/main/java/model/Review.java
+/Users/liushijie/Documents/CS6650/CS6650-Building-Scalable-Distributed-System/assignment3/consumer/review_consumer/src/main/java/service/ReviewService.java
+/Users/liushijie/Documents/CS6650/CS6650-Building-Scalable-Distributed-System/assignment3/consumer/review_consumer/src/main/java/rmqpool/RMQChannelFactory.java

@@ -1,0 +1,46 @@
+# Compiled byte code
+*.class
+
+# Set of artifacts (JAR, WAR, EAR files etc.)
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+
+# Maven related
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Temporary files created by the OS
+*.swp
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Eclipse IDE
+.classpath
+.project
+.settings/
+
+# NetBeans IDE
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+/out/

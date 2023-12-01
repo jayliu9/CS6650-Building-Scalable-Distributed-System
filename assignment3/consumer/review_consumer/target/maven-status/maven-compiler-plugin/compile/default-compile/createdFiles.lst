@@ -1,0 +1,8 @@
+service/ReviewService.class
+service/DatabaseService.class
+rmqpool/RMQChannelPool.class
+dao/ReviewDao.class
+model/Review.class
+consumer/ReviewConsumer.class
+rmqpool/RMQChannelFactory.class
+util/UUIDUtil.class
