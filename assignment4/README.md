@@ -1,4 +1,4 @@
-# Assignment 3
+# Assignment 4
 
 ### Client: `client/`
 - **Main Entry**: `client/part_2/src/main/java/LoadTester.java`
