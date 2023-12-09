@@ -15,7 +15,6 @@ import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 @WebServlet(name = "Servlet.ReviewServlet", value = "/review")
@@ -72,9 +71,17 @@ public class ReviewServlet extends HttpServlet {
                 res.getWriter().write(gson.toJson(new ErrorMsg("Album not found")));
                 return;
             }
-
-            int likes = reviewService.getAlbumLikesDislikes(albumId, "like");
-            int dislikes = reviewService.getAlbumLikesDislikes(albumId, "dislike");
+            int likes = -1;
+            int dislikes = -1;
+            try {
+                likes = reviewService.getAlbumLikesDislikes(albumId, "like");
+                dislikes = reviewService.getAlbumLikesDislikes(albumId, "dislike");
+            } catch (SQLException e) {
+                res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                res.getWriter().write(gson.toJson(new ErrorMsg("Failed to get album likes/dislikes")));
+                e.printStackTrace();
+                return;
+            }
 
             Likes likesObj = new Likes(likes, dislikes);
             res.setStatus(HttpServletResponse.SC_OK);
@@ -164,7 +171,7 @@ public class ReviewServlet extends HttpServlet {
             res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         // Update like/dislike counter in Redis
-        reviewService.updateAlbumLikesDislikes(albumId, likeOrNot, 1);
+        reviewService.updateAlbumLikesDislikesInCache(albumId, likeOrNot, 1);
     }
 
     @Override

@@ -10,7 +10,6 @@ import javax.servlet.annotation.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.UUID;
 
 import dto.ImageMetaData;
 import mapper.AlbumMapper;
@@ -125,7 +124,7 @@ public class AlbumServlet extends HttpServlet {
             return;
         }
         // Initialize {albumId, like: 0, dislike: 0} in Redis
-        reviewService.initializeAlbumLikesDislikes(String.valueOf(albumId));
+        reviewService.initializeAlbumLikesDislikesInCache(String.valueOf(albumId));
         // Create a response
         ImageMetaData responseData = new ImageMetaData(String.valueOf(albumId), String.valueOf(imageSize));
         // Send the response back as JSON
