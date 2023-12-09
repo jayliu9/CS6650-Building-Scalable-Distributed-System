@@ -72,7 +72,7 @@ public class ReviewConsumer {
         ReviewService reviewService = new ReviewService();
         String[] parts = message.split(",");
         UUID reviewID = UUID.randomUUID();
-        Review review = new Review(reviewID, UUID.fromString(parts[1]), "like".equals(parts[0]));
+        Review review = new Review(reviewID, Integer.parseInt(parts[1]), "like".equals(parts[0]));
         try {
             reviewService.createReview(review);
             System.out.println("Inserted review: " + review);

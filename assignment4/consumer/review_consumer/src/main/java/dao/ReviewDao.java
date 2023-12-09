@@ -13,7 +13,7 @@ public class ReviewDao {
         String insertSQL = "INSERT INTO Review (reviewID, albumID, likeDislikeFlag) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertSQL)) {
             stmt.setBytes(1, UUIDUtil.uuidToBytes(review.getReviewID()));
-            stmt.setBytes(2, UUIDUtil.uuidToBytes(review.getAlbumID()));
+            stmt.setInt(2, review.getAlbumID());
             stmt.setBoolean(3, review.isLikeDislikeFlag());
 
             stmt.executeUpdate();
