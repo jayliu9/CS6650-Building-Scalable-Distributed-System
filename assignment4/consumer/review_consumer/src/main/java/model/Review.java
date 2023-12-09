@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class Review {
     private UUID reviewID;
-    private UUID albumID;
+    private int albumID;
     private boolean likeDislikeFlag;
     private Timestamp timestamp;
 
@@ -13,7 +13,7 @@ public class Review {
     public Review() {
     }
 
-    public Review(UUID reviewID, UUID albumID, boolean likeDislikeFlag) {
+    public Review(UUID reviewID, int albumID, boolean likeDislikeFlag) {
         this.reviewID = reviewID;
         this.albumID = albumID;
         this.likeDislikeFlag = likeDislikeFlag;
@@ -28,11 +28,11 @@ public class Review {
         this.reviewID = reviewID;
     }
 
-    public UUID getAlbumID() {
+    public int getAlbumID() {
         return albumID;
     }
 
-    public void setAlbumID(UUID albumID) {
+    public void setAlbumID(int albumID) {
         this.albumID = albumID;
     }
 
