@@ -14,7 +14,5 @@ public interface AlbumMapper {
     AlbumMapper INSTANCE = Mappers.getMapper(AlbumMapper.class);
 
     AlbumInfo albumToAlbumInfo(Album album);
-
-    @Mapping(target="albumID", source="albumID")
-    Album albumProfileToAlbum(AlbumProfile albumProfile, UUID albumID);
+    Album albumProfileToAlbum(AlbumProfile albumProfile);
 }

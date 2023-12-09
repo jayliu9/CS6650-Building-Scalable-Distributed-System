@@ -16,11 +16,13 @@ import dto.ImageMetaData;
 import mapper.AlbumMapper;
 import model.Album;
 import service.AlbumService;
+import service.ReviewService;
 
 @WebServlet(name = "Servlet.AlbumServlet", value = "/albums")
 @MultipartConfig
 public class AlbumServlet extends HttpServlet {
     private AlbumService albumService;
+    private ReviewService reviewService;
     private Gson gson;
     private AlbumMapper albumMapper;
 
@@ -28,6 +30,7 @@ public class AlbumServlet extends HttpServlet {
     public void init() {
         albumMapper = AlbumMapper.INSTANCE;
         albumService = new AlbumService();
+        reviewService = new ReviewService();
         gson = new Gson();
     }
 
@@ -52,11 +55,13 @@ public class AlbumServlet extends HttpServlet {
         } else {
             res.setStatus(HttpServletResponse.SC_OK);
             // Retrieve album data using the provided ID in the URL
-            UUID albumId = UUID.fromString(urlParts[1]);
+            int albumId = Integer.parseInt(urlParts[1]);
             Album album = null;
             try {
                 album = albumService.getAlbum(albumId);
             } catch (SQLException e) {
+                res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                res.getWriter().write(gson.toJson(new ErrorMsg("Failed to get album")));
                 e.printStackTrace();
             }
             if (album == null) {
@@ -80,8 +85,8 @@ public class AlbumServlet extends HttpServlet {
      * @return true if the URL is valid, false otherwise.
      */
     private boolean isUrlValid(String[] urlPath) {
-        // urlPath  = "/album123"
-        // urlParts = [, album123]
+        // urlPath  = "/123"
+        // urlParts = [, 123]
         return urlPath.length == 2 && "".equals(urlPath[0]);
     }
 
@@ -100,8 +105,7 @@ public class AlbumServlet extends HttpServlet {
             res.getWriter().write(gson.toJson(new ErrorMsg("Invalid album profile")));
             return;
         }
-        UUID albumId = UUID.randomUUID();
-        Album newAlbum = albumMapper.albumProfileToAlbum(albumProfile, albumId);
+        Album newAlbum = albumMapper.albumProfileToAlbum(albumProfile);
 
         // Extract image part from the request
         Part imagePart = req.getPart("image");
@@ -111,15 +115,17 @@ public class AlbumServlet extends HttpServlet {
             return;
         }
         long imageSize = imagePart.getSize();
+        int albumId = -1;
         try (InputStream imageInputStream = imagePart.getInputStream()) {
-            albumService.createAlbum(newAlbum, imageInputStream, imageSize);
+            albumId = albumService.createAlbum(newAlbum, imageInputStream, imageSize);
         } catch (IOException | SQLException e) {
             e.printStackTrace();
             res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             res.getWriter().write(gson.toJson(new ErrorMsg("Failed to save album and image")));
             return;
         }
-
+        // Initialize {albumId, like: 0, dislike: 0} in Redis
+        reviewService.initializeAlbumLikesDislikes(String.valueOf(albumId));
         // Create a response
         ImageMetaData responseData = new ImageMetaData(String.valueOf(albumId), String.valueOf(imageSize));
         // Send the response back as JSON

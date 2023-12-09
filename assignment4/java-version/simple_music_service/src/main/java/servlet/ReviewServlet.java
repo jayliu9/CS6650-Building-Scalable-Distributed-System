@@ -4,9 +4,11 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
 import dto.ErrorMsg;
+import dto.Likes;
 import rmqpool.RMQChannelFactory;
 import rmqpool.RMQChannelPool;
 import service.AlbumService;
+import service.ReviewService;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -20,6 +22,7 @@ import java.util.concurrent.TimeoutException;
 public class ReviewServlet extends HttpServlet {
     private Connection connection;
     private AlbumService albumService;
+    private ReviewService reviewService;
     private Gson gson;
     private RMQChannelPool channelPool;
 
@@ -28,6 +31,7 @@ public class ReviewServlet extends HttpServlet {
         super.init();
         gson = new Gson();
         albumService = new AlbumService();
+        reviewService = new ReviewService();
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(System.getenv("RABBITMQ_ADDRESS"));
         try {
@@ -40,24 +44,81 @@ public class ReviewServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        String urlPath = req.getPathInfo();
+
+        // Check if we have a URL path
+        if (urlPath == null || urlPath.isEmpty()) {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            res.getWriter().write(gson.toJson(new ErrorMsg("Missing parameters")));
+            return;
+        }
+
+        String[] urlParts = urlPath.split("/");
+
+        // Validate URL path and return the appropriate response
+        if (!isGetUrlValid(urlParts)) {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            res.getWriter().write(gson.toJson(new ErrorMsg("Invalid URL format")));
+            return;
+        }
+
+        String albumId = urlParts[1];
+
+        try {
+            if (!albumExists(albumId)) {
+                res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                res.getWriter().write(gson.toJson(new ErrorMsg("Album not found")));
+                return;
+            }
+
+            int likes = reviewService.getAlbumLikesDislikes(albumId, "like");
+            int dislikes = reviewService.getAlbumLikesDislikes(albumId, "dislike");
+
+            Likes likesObj = new Likes(likes, dislikes);
+            res.setStatus(HttpServletResponse.SC_OK);
+            res.setContentType("application/json");
+            res.setCharacterEncoding("UTF-8");
+            res.getWriter().write(gson.toJson(likesObj));
+
+        } catch (Exception e) {
+            res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            res.getWriter().write(gson.toJson(new ErrorMsg("Internal server error")));
+            e.printStackTrace();
+        }
+    }
+
     /**
-     * Validates the URL format.
+     * Validates the URL format for Get request.
+     *
+     * @param urlPath An array of URL segments.
+     * @return true if the URL is valid, false otherwise.
+     */
+    private boolean isGetUrlValid(String[] urlPath) {
+        // urlPath  = "/123"
+        // urlParts = [, 123]
+        return urlPath.length == 2 && "".equals(urlPath[0]);
+    }
+
+    /**
+     * Validates the URL format for Post request.
      *
      * @param pathParts An array of URL segments.
      * @return true if the URL is valid, false otherwise.
      */
-    private boolean isUrlValid(String[] pathParts) {
+    private boolean isPostUrlValid(String[] pathParts) {
         // urlPath  = /{likeornot}/{albumID}
         // urlParts = [, likeornot, albumId]
         return pathParts.length == 3 && "".equals(pathParts[0]) && (pathParts[1].equals("like") || pathParts[1].equals("dislike")) && !pathParts[2].isEmpty();
     }
 
     private boolean albumExists(String albumId) throws SQLException {
-        return albumService.getAlbum(UUID.fromString(albumId)) != null;
+        return albumService.getAlbum(Integer.parseInt(albumId)) != null;
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
         String pathInfo = req.getPathInfo(); // /{likeornot}/{albumID}
         // Check if we have a URL path
         if (pathInfo == null || pathInfo.isEmpty()) {
@@ -67,7 +128,7 @@ public class ReviewServlet extends HttpServlet {
             return;
         }
         String[] pathParts = pathInfo.split("/");
-        if (!isUrlValid(pathParts)) {
+        if (!isPostUrlValid(pathParts)) {
             res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             res.getWriter().write(gson.toJson(new ErrorMsg("Invalid URL format")));
             return;
@@ -102,6 +163,8 @@ public class ReviewServlet extends HttpServlet {
             e.printStackTrace();
             res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+        // Update like/dislike counter in Redis
+        reviewService.updateAlbumLikesDislikes(albumId, likeOrNot, 1);
     }
 
     @Override

@@ -15,21 +15,15 @@ public class AlbumService {
         this.albumDAO = new AlbumDAO();
     }
 
-    public Album getAlbum(UUID albumId) throws SQLException {
+    public Album getAlbum(int albumId) throws SQLException {
         try (Connection conn = DatabaseService.getConnection()) {
             return albumDAO.getAlbumByKey(conn, albumId);
         }
     }
 
-    public void createAlbum(Album album, InputStream inputStream, long imageSize) throws SQLException {
+    public int createAlbum(Album album, InputStream inputStream, long imageSize) throws SQLException {
         try (Connection conn = DatabaseService.getConnection()) {
-
-            albumDAO.insertAlbum(conn, album, inputStream, imageSize);
-
-        } catch (SQLException e) {
-            // Handle exception or rethrow
-            e.printStackTrace();
-            throw e;
+            return albumDAO.insertAlbum(conn, album, inputStream, imageSize);
         }
     }
 
