@@ -7,7 +7,7 @@ public class RedisService {
     private static JedisPool jedisPool;
 
     static {
-        jedisPool = new JedisPool("localhost", 6379);
+        jedisPool = new JedisPool(System.getenv("REDIS_ADDRESS"), 6379);
     }
 
     public static Jedis getJedis() {
